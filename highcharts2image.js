@@ -1,6 +1,7 @@
 /**
  * highCharts2Image v1.0.0 by Nedgeva
  * 'Render Highcharts/Highstock plots to image on client side without any hassle'
+ * https://github.com/Nedgeva/es6-highcharts2image
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @param {object} options - Main highCharts2Image options object
  * @param {object} options.chartOptions - Highcharts/Highstock options

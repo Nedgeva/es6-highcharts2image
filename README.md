@@ -23,7 +23,7 @@ highcharts2image is standalone micro library written in pure JS (ES6) using Prom
 
 ## Installation
 
-    git clone https://github.com/Nedgeva/es6-highcharts2image
+    git clone
     npm install
 
 ## Usage
