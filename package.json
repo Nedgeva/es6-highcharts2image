@@ -1,0 +1,24 @@
+{
+  "name": "highcharts2image",
+  "version": "1.0.0",
+  "description": "Micro lib which allows render Highcharts plots to image on client side without any hassle",
+  "main": "highcharts2image.js",
+  "scripts": {
+    "build": "babel highcharts2image.js -o dist/highcharts2image.min.js",
+    "test": "test\\index.html"
+  },
+  "keywords": [
+    "highcharts",
+    "highstock",
+    "render",
+    "js",
+    "png",
+    "image"
+  ],
+  "author": "Nedgeva",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-preset-latest": "^6.22.0"
+  }
+}

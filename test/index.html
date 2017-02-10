@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>highCharts2Image</title>
+  <link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <!-- The app -->
+  <script src="../dist/highcharts2image.min.js"></script>
+
+  <!-- Mocha files -->
+  <script src="https://cdn.rawgit.com/Automattic/expect.js/0.3.1/index.js"></script>
+  <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
+
+  <!-- Mocha setup -->
+  <script>
+    mocha.ui('bdd')
+    mocha.checkLeaks()
+    mocha.timeout(5000)
+  </script>
+
+  <!-- Spec.js -->
+  <script src="spec.js"></script>
+
+  <!-- Run! -->
+  <script>
+    mocha.run()
+  </script>
+
+</body>
+</html>
