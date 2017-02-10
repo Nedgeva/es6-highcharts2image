@@ -5,17 +5,15 @@
 ## Description
 
 highcharts2image is standalone micro library written in pure JS (ES6) using Promises, runs in browser and requires no extra dependencies (actually it loads all necessary depedencies by itself).
-
 Just pass chart options to highcharts2image and it will resolve base64 encoded PNG image.
-
 Can be tweaked to use this lib locally without internet connection.
 
 ## How it works
 
   0. highcharts2image takes options and returns Promise object
-  1. highcharts2image creates 1px*1px hidden iframe right before </body>
+  1. highcharts2image creates 1px*1px hidden iframe right before enclosing body tag
   2. adds window.onmessage listener
-  3. appends <div> container to iframe body with provided width and height
+  3. appends div container to iframe body with provided width and height
   4. injects 3 scripts into created iframe and loads them sequentially (highcharts/highstock lib, exporting and offline-exporting JS libs)
   5. renders chart based on provided options to <div> container
   6. optionally runs callback with created chart object (very useful option!)
@@ -68,7 +66,6 @@ You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from '
 
 ### highCharts2Image(options)
 Returns Promise that will be fullfiled with base64 encoded png or rejected with error explanation.
-
 Takes single `options` {Object} argument with only one required property 'chartOptions':
 
 {
