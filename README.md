@@ -15,7 +15,7 @@ Can be tweaked to use this lib locally without internet connection.
   2. adds window.onmessage listener
   3. appends div container to iframe body with provided width and height
   4. injects 3 scripts into created iframe and loads them sequentially (highcharts/highstock lib, exporting and offline-exporting JS libs)
-  5. renders chart based on provided options to <div> container
+  5. renders chart based on provided options to div container
   6. optionally runs callback with created chart object (very useful option!)
   7. internally converts rendered svg chart to base64 encoded pnd image (thanks to exporting and offline-exporting JS libs)
   8. sends image back to highcharts2image via window.postMessage()
