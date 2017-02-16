@@ -1,6 +1,6 @@
 {
   "name": "highcharts2image",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Micro lib which allows render Highcharts plots to image on client side without any hassle",
   "main": "highcharts2image.js",
   "scripts": {
