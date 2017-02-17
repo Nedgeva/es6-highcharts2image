@@ -34,6 +34,9 @@ You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from '
 <script src="../dist/highcharts2image.min.js"></script>
 <script>
   // Any valid HighCharts plot options is ok
+  // Please note: you don't have to specify
+  // chart.renderTo option as it will be
+  // processed internally
   const chartOptions = {
     xAxis: {
       categories: ['Jan', 'Feb', 'Mar', ... ]
@@ -52,13 +55,28 @@ You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from '
   
   // call highCharts2Image and wait for result
   highCharts2Image(options)
-      .then(result => {
-        // 'result' is the base64 encoded png
-      })
-      .catch(reason => {
-        // Oops, we've got an error!
-        // reason is the string with useful information about error
-      })
+    .then(result => {
+      // 'result' is the base64 encoded png
+      const png = result
+      const img = document.createElement('img')
+      img.src = png
+      document.body.appendChild(img)
+    })
+    .catch(reason => {
+      // Oops, we've got an error!
+      // 'reason' is the string with useful information about error
+      console.error(reason)
+    })
+
+  // or even simpler with async/await
+  async function appendImg() {
+    const png = await highCharts2Image(options)
+    const img = document.createElement('img')
+    img.src = png
+    document.body.appendChild(img)
+  }
+
+  appendImg()
 </script>
 ```
 
@@ -74,11 +92,17 @@ Takes single `options` {Object} argument with only one required property 'chartO
 - [`chartEngine`] {String} - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
 - [`chartEngineVersion`] {String} - Highcharts/Highstock engine version (default is '5.0.7')
 - [`chartCallback`] {Function} - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
+`Please note:` if you are passing custom callback that modifies `chart` object, use 'false' flag for redraw option where it's possible, for example: chart.update({/* some options */}, `false`) 
+and don't forget to call `chart.redraw()` at the end of your callback fn
 - [`iframeId`] {String} - specify id for temporary created iframe by highCharts2Image lib (default is pseudo-random GUID used as iframe id)
 - [`width`] {Number} - specify width in pixels for output image (default is `600`)
 - [`height`] {Number} - specify height in pixels for output image (default is `400`)
 
 }
+
+## Changelog
+1.0.1 - switched chart-to-image rendering mechanism to event-based instead of sync one
+1.0.0 - initial release
 
 ## Build with Babel
 

@@ -1,5 +1,5 @@
 /**
- * highCharts2Image v1.0.0 by Nedgeva
+ * highCharts2Image v1.0.1 by Nedgeva
  * 'Render Highcharts/Highstock plots to image on client side without any hassle'
  * https://github.com/Nedgeva/es6-highcharts2image
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,28 +21,27 @@ const highCharts2Image = options =>
     // GUID generator for
     // pseudo-random iframe id
     const pseudoGuid = () => {
-      const fourChars = () => {
-        return ( ((1 + Math.random()) * 0x10000) | 0 )
+      const fourChars = () => 
+        ( ((1 + Math.random()) * 0x10000) | 0 )
           .toString(16)
           .substring(1)
           .toUpperCase()
-      }
       
       return fourChars()
-           + fourChars()
-           + "-" + fourChars()
-           + "-" + fourChars()
-           + "-" + fourChars()
-           + "-" + fourChars()
-           + fourChars()
-           + fourChars()
+        + fourChars()
+        + "-" + fourChars()
+        + "-" + fourChars()
+        + "-" + fourChars()
+        + "-" + fourChars()
+        + fourChars()
+        + fourChars()
     }
 
     // setting defaults, if any option is omitted
     const opts = Object.assign({
       chartEngine: 'highcharts',
       chartEngineVersion: '5.0.7',
-      chartCallback: chart => { /* do anything with chart object */ },
+      chartCallback: chart => chart.redraw(),
       iframeId: pseudoGuid(),
       width: 600,
       height: 400
@@ -59,6 +58,7 @@ const highCharts2Image = options =>
     } = opts
 
     // escape from promise with iframe removing
+    // and listener detaching
     const exitGracefully = (msg, isRejected) => {
       window.removeEventListener('message', onmessage)
       const hc2imageFrame = window.document.getElementById(iframeId)
@@ -139,7 +139,19 @@ const highCharts2Image = options =>
           // set/override renderTo option
           const options = Object.assign($OPTIONS, {
             chart: {
-              renderTo: 'container'
+              renderTo: 'container',
+              events: {
+                redraw: function() {
+                  // make sure chart is rendered and then
+                  // encode svg chart to png image
+                  return this.getSVGForLocalExport(
+                    null, 
+                    null, 
+                    null, 
+                    getImageFromSVG
+                  )
+                }
+              }
             }
           })
           
@@ -148,9 +160,6 @@ const highCharts2Image = options =>
 
           // pass chart object to callback function
           const cbResult = ( $CALLBACK )(chart)
-
-          // encode svg chart to png image
-          chart.getSVGForLocalExport(null, null, null, getImageFromSVG)
   
         } catch(err) {  
           
