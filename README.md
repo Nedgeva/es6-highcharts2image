@@ -92,16 +92,19 @@ Takes single `options` {Object} argument with only one required property 'chartO
 - [`chartEngine`] {String} - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
 - [`chartEngineVersion`] {String} - Highcharts/Highstock engine version (default is '5.0.7')
 - [`chartCallback`] {Function} - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
+
 `Please note:` if you are passing custom callback that modifies `chart` object, use 'false' flag for redraw option where it's possible, for example: chart.update({/* some options */}, `false`) 
 and don't forget to call `chart.redraw()` at the end of your callback fn
-- [`iframeId`] {String} - specify id for temporary created iframe by highCharts2Image lib (default is pseudo-random GUID used as iframe id)
 - [`width`] {Number} - specify width in pixels for output image (default is `600`)
 - [`height`] {Number} - specify height in pixels for output image (default is `400`)
 
 }
 
 ## Changelog
+1.0.3 - removed redundant code, disabled `iframeId` option as unneeded
+
 1.0.1 - switched chart-to-image rendering mechanism to event-based instead of sync one
+
 1.0.0 - initial release
 
 ## Build with Babel

@@ -1,5 +1,5 @@
 /**
- * highCharts2Image v1.0.1 by Nedgeva
+ * highCharts2Image v1.0.3 by Nedgeva
  * 'Render Highcharts/Highstock plots to image on client side without any hassle'
  * https://github.com/Nedgeva/es6-highcharts2image
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -8,7 +8,6 @@
  * @param {string} options.chartEngine - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
  * @param {string} options.chartEngineVersion - Highcharts/Highstock engine version (default is '5.0.7')
  * @param {function} options.chartCallback - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
- * @param {string} options.iframeId - specify id for temporary created iframe by highCharts2Image lib (default is pseudo-random GUID used as iframe id)
  * @param {number} options.width - specify width in pixels for output image (default is `600`)
  * @param {number} options.height - specify width in pixels for output image (default is `400`)
  * @return {Promise<string>} - Base64 encoded PNG image
@@ -42,7 +41,6 @@ const highCharts2Image = options =>
       chartEngine: 'highcharts',
       chartEngineVersion: '5.0.7',
       chartCallback: chart => chart.redraw(),
-      iframeId: pseudoGuid(),
       width: 600,
       height: 400
     }, options)
@@ -52,17 +50,17 @@ const highCharts2Image = options =>
       chartOptions,
       chartEngineVersion,
       chartCallback,
-      iframeId,
       width,
       height
     } = opts
+
+    const iframeId = pseudoGuid()
 
     // escape from promise with iframe removing
     // and listener detaching
     const exitGracefully = (msg, isRejected) => {
       window.removeEventListener('message', onmessage)
-      const hc2imageFrame = window.document.getElementById(iframeId)
-      hc2imageFrame.parentElement.removeChild(hc2imageFrame)
+      document.body.removeChild(iframe)
       return isRejected
         ? reject(msg)
         : resolve(msg)
@@ -110,7 +108,7 @@ const highCharts2Image = options =>
       doc.body.appendChild(script)
     }
 
-    const fillFrame = () => {
+    const fillFrame = e => {
       
       // convert payload fn to string
       // that will be eval'd inside iframe
@@ -192,15 +190,13 @@ const highCharts2Image = options =>
         {text: payloadJS}
       ]
       
-      const doc = window.frames[iframeId].document
+      const doc = e.path[0].contentDocument
       doc.body.insertAdjacentHTML('beforeend', HTMLMarkup)
       injectr(doc, injScriptList)
     }
 
     // create iframe
     const iframe = document.createElement('iframe')
-    iframe.id = iframeId
-    iframe.name = iframeId
     iframe.style = 'width: 1px; height: 1px; visibility: hidden;'
     iframe.onload = fillFrame
 
