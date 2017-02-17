@@ -25,8 +25,7 @@ Can be tweaked to use this lib locally without internet connection.
 
 ## Installation
 
-    git clone https://github.com/Nedgeva/es6-highcharts2image
-    npm install
+    npm i highcharts2image
 
 ## Usage
 You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from 'dist/highcharts2image.min.js'. Simply attach highcharts2image to the bottom of your page and call it like this:
