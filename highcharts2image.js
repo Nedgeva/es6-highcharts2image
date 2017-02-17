@@ -1,5 +1,5 @@
 /**
- * highCharts2Image v1.0.3 by Nedgeva
+ * highCharts2Image v1.0.4 by Nedgeva
  * 'Render Highcharts/Highstock plots to image on client side without any hassle'
  * https://github.com/Nedgeva/es6-highcharts2image
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,8 +46,8 @@ const highCharts2Image = options =>
     }, options)
 
     const { 
-      chartEngine,
       chartOptions,
+      chartEngine,
       chartEngineVersion,
       chartCallback,
       width,
@@ -55,6 +55,11 @@ const highCharts2Image = options =>
     } = opts
 
     const iframeId = pseudoGuid()
+    
+    // stringifying chartOptions early
+    // to prevent FF from caching options 
+    // (bug in FF Nightly 54.0a1 (2017-02-16) (32-bit))
+    const strChartOptions = JSON.stringify(chartOptions)
 
     // escape from promise with iframe removing
     // and listener detaching
@@ -108,7 +113,7 @@ const highCharts2Image = options =>
       doc.body.appendChild(script)
     }
 
-    const fillFrame = e => {
+    const fillFrame = () => {
       
       // convert payload fn to string
       // that will be eval'd inside iframe
@@ -168,7 +173,7 @@ const highCharts2Image = options =>
       })
         .toString()
         .replace('$FRAMEID', iframeId)
-        .replace('$OPTIONS', JSON.stringify(chartOptions))
+        .replace('$OPTIONS', strChartOptions)
         .replace('$CHARTMETHOD', chartMethodObj[chartEngine.toLowerCase()])
         .replace('$CALLBACK', chartCallback.toString())
 
@@ -189,8 +194,8 @@ const highCharts2Image = options =>
         {src: distroObj.offlineExporting},
         {text: payloadJS}
       ]
-      
-      const doc = e.path[0].contentDocument
+
+      const doc = iframe.contentDocument
       doc.body.insertAdjacentHTML('beforeend', HTMLMarkup)
       injectr(doc, injScriptList)
     }

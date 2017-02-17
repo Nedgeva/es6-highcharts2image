@@ -100,7 +100,11 @@ and don't forget to call `chart.redraw()` at the end of your callback fn
 }
 
 ## Changelog
+1.0.4 - fixed compatibility issues with Firefox
+
 1.0.3 - removed redundant code, disabled `iframeId` option as unneeded
+
+1.0.2 - skipped (internal build)
 
 1.0.1 - switched chart-to-image rendering mechanism to event-based instead of sync one
 
