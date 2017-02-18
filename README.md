@@ -17,11 +17,11 @@ Can be tweaked to use this lib locally without internet connection.
   4. injects 3 scripts into created iframe and loads them sequentially (highcharts/highstock lib, exporting and offline-exporting JS libs)
   5. renders chart based on provided options to div container
   6. optionally runs callback with created chart object (very useful option!)
-  7. internally converts rendered svg chart to base64 encoded pnd image (thanks to exporting and offline-exporting JS libs)
+  7. internally converts rendered svg chart to base64 encoded png image (thanks to exporting and offline-exporting JS libs)
   8. sends image back to highcharts2image via window.postMessage()
   9. removes attached window.onmessage listener
   10. removes created iframe
-  11. resolves base64 encoded pnd image as value or rejects with error message
+  11. resolves base64 encoded png image as value or rejects with error message
 
 ## Installation
 
@@ -56,9 +56,8 @@ You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from '
   highCharts2Image(options)
     .then(result => {
       // 'result' is the base64 encoded png
-      const png = result
       const img = document.createElement('img')
-      img.src = png
+      img.src = result
       document.body.appendChild(img)
     })
     .catch(reason => {
@@ -69,10 +68,13 @@ You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from '
 
   // or even simpler with async/await
   async function appendImg() {
-    const png = await highCharts2Image(options)
-    const img = document.createElement('img')
-    img.src = png
-    document.body.appendChild(img)
+    try {
+      const img = document.createElement('img')
+      img.src = await highCharts2Image(options)
+      document.body.appendChild(img)
+    } catch (ex) {
+      console.error(ex)
+    }
   }
 
   appendImg()
@@ -100,15 +102,12 @@ and don't forget to call `chart.redraw()` at the end of your callback fn
 }
 
 ## Changelog
-1.0.4 - fixed compatibility issues with Firefox
 
-1.0.3 - removed redundant code, disabled `iframeId` option as unneeded
-
-1.0.2 - skipped (internal build)
-
-1.0.1 - switched chart-to-image rendering mechanism to event-based instead of sync one
-
-1.0.0 - initial release
+    1.0.4 - fixed compatibility issues with Firefox
+    1.0.3 - removed redundant code, disabled `iframeId` option as unneeded
+    1.0.2 - skipped (internal build)
+    1.0.1 - switched chart-to-image rendering mechanism to event-based instead of sync one
+    1.0.0 - initial release
 
 ## Build with Babel
 
