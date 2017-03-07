@@ -92,7 +92,7 @@ Takes single `options` {object} argument with only one required property 'chartO
 - `chartOptions` {object}  - Highcharts/Highstock options
 - [`chartEngine`] {string} - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
 - [`chartEngineVersion`] {string} - Highcharts/Highstock engine version (default is '5.0.7')
-- [`chartCallback`] {function} - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
+- [`chartCallback`] {function} - options.chartCallback - pass callback function with `chart` and `window` as arguments (default is `chart => chart.redraw()`)
 
 `Please note:` if you are passing custom callback that modifies `chart` object, use 'false' flag for redraw option where it's possible, for example: chart.update({/* some options */}, `false`) 
 and don't forget to call `chart.redraw()` at the end of your callback fn
@@ -104,7 +104,7 @@ and don't forget to call `chart.redraw()` at the end of your callback fn
 
 ## Changelog
 
-    1.1.0 - exposed `distro` option, now it's possible to set custom urls for script sources and even inject custom JS libs
+    1.1.0 - exposed `distro` option, now it's possible to set custom urls for lib CDNs and even inject custom JS libs; enhanced callback caller; fixed bugs; no more `eval`!
     1.0.4 - fixed compatibility issues with Firefox
     1.0.3 - removed redundant code, disabled `iframeId` option as unneeded
     1.0.2 - skipped (internal build)
