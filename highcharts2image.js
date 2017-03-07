@@ -1,5 +1,5 @@
 /**
- * highCharts2Image v1.0.4 by Nedgeva
+ * highCharts2Image v1.1.0 by Nedgeva
  * 'Render Highcharts/Highstock plots to image on client side without any hassle'
  * https://github.com/Nedgeva/es6-highcharts2image
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -7,7 +7,8 @@
  * @param {object} options.chartOptions - Highcharts/Highstock options
  * @param {string} options.chartEngine - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
  * @param {string} options.chartEngineVersion - Highcharts/Highstock engine version (default is '5.0.7')
- * @param {function} options.chartCallback - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
+ * @param {function} options.chartCallback - pass callback function with `chart` and `window` as arguments (default is `chart => chart.redraw()`)
+ * @param {object} options.distro - specify urls for highcharts/highstock and even custom libs. Especially useful when creating offline app. Default `{highcharts: 'https://cdnjs.cloudflare.com/.../highcharts.js', exporting: 'https://...', etc}` See spec.js file for more info
  * @param {number} options.width - specify width in pixels for output image (default is `600`)
  * @param {number} options.height - specify width in pixels for output image (default is `400`)
  * @return {Promise<string>} - Base64 encoded PNG image
@@ -50,15 +51,27 @@ const highCharts2Image = options =>
       chartEngine,
       chartEngineVersion,
       chartCallback,
+      distro,
       width,
       height
     } = opts
+
+    // set main CDN and default distro
+    const cdn = 'https://cdnjs.cloudflare.com/ajax/libs/highcharts'
+
+    const defaultDistroObj = {
+      highcharts: `${cdn}/${chartEngineVersion}/highcharts.js`,
+      highstock: `${cdn}/${chartEngineVersion}/highstock.js`,
+      exporting: `${cdn}/${chartEngineVersion}/js/modules/exporting.js`,
+      offlineExporting: `${cdn}/${chartEngineVersion}/js/modules/offline-exporting.js`
+    }
+
+    const distroObj = Object.assign(defaultDistroObj, distro)
 
     const iframeId = pseudoGuid()
     
     // stringifying chartOptions early
     // to prevent FF from caching options 
-    // (bug in FF Nightly 54.0a1 (2017-02-16) (32-bit))
     const strChartOptions = JSON.stringify(chartOptions)
 
     // escape from promise with iframe removing
@@ -71,25 +84,17 @@ const highCharts2Image = options =>
         : resolve(msg)
     }
 
-    // set distro urls
-    const distroUrl = 'https://cdnjs.cloudflare.com/ajax/libs/highcharts'
-
-    const distroObj = {
-      highcharts: `${distroUrl}/${chartEngineVersion}/highcharts.js`,
-      highstock: `${distroUrl}/${chartEngineVersion}/highstock.js`,
-      exporting: `${distroUrl}/${chartEngineVersion}/js/modules/exporting.js`,
-      offlineExporting: `${distroUrl}/${chartEngineVersion}/js/modules/offline-exporting.js`
-    }
-
     const chartMethodObj = {
       highcharts: 'chart',
       highstock: 'stockChart'
     }
 
     // define injector fn to ensure sequential script loading
-    const injectr = (doc, srcList) => {
+    const injectr = (doc, srcList, cb) => {
       if (srcList.length === 0)
-        return
+        return cb
+          ? cb()
+          : false
 
       const script = doc.createElement('script')
       script.type = 'text/javascript' 
@@ -97,105 +102,136 @@ const highCharts2Image = options =>
       const source = srcList[0]
       const srcListNew = srcList.slice(1)
 
-      script.onload = e =>
-        injectr(doc, srcListNew)
+      const addRemoteScript = (target, src) => {
+        target.onload = e =>
+          injectr(doc, srcListNew, cb)
 
-      script.onerror = e =>
-        exitGracefully(`Error: can't load script: ${source.src}`, true)
+        target.onerror = e =>
+          exitGracefully(`Error: can't load script: ${src.src}`, true)
+
+        target.src = src.src
+        doc.body.appendChild(target)
+      }
+
+      const addTextScript = (target, src) => {
+        target.textContent = src.text
+        doc.body.appendChild(target)
+        injectr(doc, srcListNew, cb)
+      }
 
       if (source.src)
-        script.src = source.src
+        return addRemoteScript(script, source)
       else if (source.text)
-        script.textContent = source.text
-      else 
-        return
-
-      doc.body.appendChild(script)
+        return addTextScript(script, source)
+      else
+        return injectr(doc, srcListNew, cb)
     }
 
-    const fillFrame = () => {
-      
-      // convert payload fn to string
-      // that will be eval'd inside iframe
-      const payloadFn = (() => {
-        const win = window.frames.parent
-        
-        // post messages to parent window via window.postMessage()
-        const postBack = (png, errMsg) =>
-          win.postMessage({
-            from: '$FRAMEID',
-            png,
-            errMsg
-          }, '*')
-
-        const getImageFromSVG = svg =>
-          Highcharts.imageToDataUrl(
-            Highcharts.svgToDataUrl(svg),
-            'image/png',
-            { /* empty */ },
-            1,
-            postBack
+    const payloadFn = innerWin => {
+      const parentWin = window.frames.parent
+            
+      // post messages to parent window via window.postMessage()
+      const postBack = (png, errMsg) =>
+        parentWin.postMessage({
+          from: innerWin.FRAMEID,
+          png,
+          errMsg
+        }, '*')
+    
+      const getImageFromSVG = svg =>
+        innerWin.Highcharts.imageToDataUrl(
+          innerWin.Highcharts.svgToDataUrl(svg),
+          'image/png',
+          { /* empty */ },
+          1,
+          postBack
+        )
+            
+      try {
+    
+        function hc2i() {
+          // make sure chart is rendered and then
+          // encode svg chart to png image
+          return this.getSVGForLocalExport(
+            null, 
+            null, 
+            null, 
+            getImageFromSVG
           )
-        
-        try {
-          
-          // set/override renderTo option
-          const options = Object.assign($OPTIONS, {
-            chart: {
-              renderTo: 'container',
-              events: {
-                redraw: function() {
-                  // make sure chart is rendered and then
-                  // encode svg chart to png image
-                  return this.getSVGForLocalExport(
-                    null, 
-                    null, 
-                    null, 
-                    getImageFromSVG
-                  )
-                }
-              }
-            }
-          })
-          
-          // draw chart
-          const chart = new Highcharts.$CHARTMETHOD( options )
-
-          // pass chart object to callback function
-          const cbResult = ( $CALLBACK )(chart)
-  
-        } catch(err) {  
-          
-          // post back error message via window.postMessage()
-          postBack(null, err.toString())
-          
         }
-      })
-        .toString()
-        .replace('$FRAMEID', iframeId)
-        .replace('$OPTIONS', strChartOptions)
-        .replace('$CHARTMETHOD', chartMethodObj[chartEngine.toLowerCase()])
-        .replace('$CALLBACK', chartCallback.toString())
+              
+        // set/override renderTo option
+        const options = Object.assign(JSON.parse(innerWin.CHARTOPTIONS), {
+          chart: {
+            renderTo: 'container',
+            events: {
+              redraw: hc2i
+            }
+          }
+        })
+              
+        // draw chart
+        const chart = new innerWin.Highcharts[innerWin.CHARTMETHOD](options)
+        
+        // run callback immediately after chart is drawn
+        {
+          innerWin.CALLBACK(chart, innerWin)
+        }
 
+      } catch (err) {
+
+        // post back error message via window.postMessage()
+        postBack(null, err.toString())
+              
+      }
+    }
+
+    const payloadJS =
+      `
+        PAYLOAD(window)
+      ` 
+
+    const fillFrame = () => {
+
+      const iframeWin = iframe.contentWindow || iframe
+      iframeWin.FRAMEID = iframeId
+      iframeWin.CHARTOPTIONS = strChartOptions //chartOptions
+      iframeWin.CHARTMETHOD = chartMethodObj[chartEngine.toLowerCase()]
+      iframeWin.CALLBACK = chartCallback
+      iframeWin.PAYLOAD = payloadFn
 
       const HTMLMarkup =
         `
           <div id="container" style="width: ${width}px; height: ${height}px;"></div>
         `
-      
-      const payloadJS =
-        `
-          eval( (${payloadFn})() )
-        `
 
-      const injScriptList = [
-        {src: distroObj[chartEngine.toLowerCase()]},
-        {src: distroObj.exporting},
-        {src: distroObj.offlineExporting},
-        {text: payloadJS}
-      ]
+      // we need this fn to preserve script loading order
+      const generateScriptList = () => {
+        const blacklist = [
+          'highcharts', 
+          'highstock', 
+          'exporting', 
+          'offlineExporting'
+        ]
+
+        const addCustomScripts = () =>
+          Object.keys(distroObj)
+            .filter(libName => !blacklist.includes(libName))
+            .map(libName => ({src: distroObj[libName]}))
+
+        return [
+          {src: distroObj[chartEngine.toLowerCase()]},
+          {src: distroObj.exporting},
+          {src: distroObj.offlineExporting},
+          ...addCustomScripts(),
+          {text: payloadJS}
+        ]
+      }
+
+      const injScriptList = generateScriptList()
 
       const doc = iframe.contentDocument
+
       doc.body.insertAdjacentHTML('beforeend', HTMLMarkup)
       injectr(doc, injScriptList)
     }
@@ -207,7 +243,7 @@ const highCharts2Image = options =>
 
     // append iframe
     document.body.appendChild(iframe)
-    
+
     // deploy conflict-free 'window.onmessage' listener
     const onmessage = message => {
       const { 

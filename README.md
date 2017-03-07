@@ -6,7 +6,7 @@
 
 highcharts2image is standalone micro library written in pure JS (ES6) using Promises, runs in browser and requires no extra dependencies (actually it loads all necessary depedencies by itself).
 Just pass chart options to highcharts2image and it will resolve base64 encoded PNG image.
-Can be tweaked to use this lib locally without internet connection.
+This lib can be tweaked for working offline.
 
 ## How it works
 
@@ -85,24 +85,26 @@ You can use pre-built (ES6 transpiled to ES5 with Babel) minified version from '
 
 ### highCharts2Image(options)
 Returns Promise that will be fullfiled with base64 encoded png or rejected with error explanation.
-Takes single `options` {Object} argument with only one required property 'chartOptions':
+Takes single `options` {object} argument with only one required property 'chartOptions':
 
 {
 
-- `chartOptions` {Object}  - Highcharts/Highstock options
-- [`chartEngine`] {String} - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
-- [`chartEngineVersion`] {String} - Highcharts/Highstock engine version (default is '5.0.7')
-- [`chartCallback`] {Function} - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
+- `chartOptions` {object}  - Highcharts/Highstock options
+- [`chartEngine`] {string} - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
+- [`chartEngineVersion`] {string} - Highcharts/Highstock engine version (default is '5.0.7')
+- [`chartCallback`] {function} - pass callback function with `chart` as single argument (default is `chart => chart.redraw()`)
 
 `Please note:` if you are passing custom callback that modifies `chart` object, use 'false' flag for redraw option where it's possible, for example: chart.update({/* some options */}, `false`) 
 and don't forget to call `chart.redraw()` at the end of your callback fn
-- [`width`] {Number} - specify width in pixels for output image (default is `600`)
-- [`height`] {Number} - specify height in pixels for output image (default is `400`)
+- [`distro`] {object} - specify urls for highcharts/highstock libs. Especially useful when creating offline app. Default `{highcharts: 'https://cdnjs.cloudflare.com/.../highcharts.js', exporting: '...url...', etc}`
+- [`width`] {number} - specify width in pixels for output image (default is `600`)
+- [`height`] {number} - specify height in pixels for output image (default is `400`)
 
 }
 
 ## Changelog
 
+    1.1.0 - exposed `distro` option, now it's possible to set custom urls for script sources and even inject custom JS libs
     1.0.4 - fixed compatibility issues with Firefox
     1.0.3 - removed redundant code, disabled `iframeId` option as unneeded
     1.0.2 - skipped (internal build)

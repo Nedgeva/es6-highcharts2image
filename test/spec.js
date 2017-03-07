@@ -17,6 +17,16 @@ const chartOptions = {
   }
 }
 
+const isBase64 = str => {
+  try {
+    const commaIndex = str.indexOf(',') + 1
+    const base64 = str.slice(commaIndex, str.length)
+    return btoa(atob(base64)) == base64;
+  } catch (err) {
+    return false;
+  }
+}
+
 describe('Testing highCharts2Image internal features', () => {
 
   const elToRemove = {
@@ -38,6 +48,9 @@ describe('Testing highCharts2Image internal features', () => {
     const options = { chartOptions }
 
     return highCharts2Image(options)
+      .catch(error =>
+        expect().fail(error)
+      )
 
   })
 
@@ -97,16 +110,6 @@ describe('Testing highCharts2Image external features', () => {
 
   it('Should resolve proper base64 encoded image', () => {
 
-    const isBase64 = str => {
-      try {
-        const commaIndex = str.indexOf(',') + 1
-        const base64 = str.slice(commaIndex, str.length)
-        return btoa(atob(base64)) == base64;
-      } catch (err) {
-        return false;
-      }
-    }
-
     const options = {
       chartOptions,
       width: 1,
@@ -116,6 +119,9 @@ describe('Testing highCharts2Image external features', () => {
     return highCharts2Image(options)
       .then(result =>
         expect(isBase64(result)).to.be(true)
+      )
+      .catch(error =>
+        expect().fail(error)
       )
 
   })
@@ -139,6 +145,9 @@ describe('Testing highCharts2Image external features', () => {
         img.src = result
         img.onload = testImgOnLoad
       })
+      .catch(error =>
+        expect().fail(error)
+      )
 
   })
 
@@ -163,6 +172,53 @@ describe('Testing highCharts2Image external features', () => {
         expect(resultList).to.have.length(5)
         expect(isResultsAreSame).to.be.ok()
       })
+      .catch(error =>
+        expect().fail(error)
+      )
+
+  })
+
+  it('Should allow to pass custom script and custom callback with async rendering', () => {
+
+    const stockOptions = {
+      series: []
+    }
+
+    const cb = (chart, win) => {
+      chart.addSeries({
+        name: 'ADBE',
+        data: win.ADBE
+      }, false)
+      
+      chart.addSeries({
+        name: 'MSFT',
+        data: win.MSFT
+      }, false)
+
+      chart.redraw()
+    }
+
+    const options = {
+      chartOptions: stockOptions,
+      chartEngine: 'highstock',
+      chartCallback: cb,
+      distro: {
+        customScript: 'https://www.highcharts.com/samples/data/three-series-1000-points.js'
+      },
+      width: 400,
+      height: 300
+    }
+
+    return highCharts2Image(options)
+      .then(result => {
+        expect(isBase64(result)).to.be(true);
+        /*const img = document.createElement('img')
+        img.src = result
+        document.body.appendChild(img)*/
+      })
+      .catch(error =>
+        expect().fail(error)
+      )
 
   })
 
@@ -179,27 +235,39 @@ describe('Testing highCharts2Image external features', () => {
       chartOptions,
       width: 200,
       height: 400
-    }    
-
-    const chartDataList = chartOptions.series[0].data
+    }
 
     const optionList = new Array(5)
       .fill(options)
 
+    const chartDataList = chartOptions.series[0].data
+
     const promiseList = optionList
       .map(option => {
         option.chartOptions.series[0].data = shuffle(chartDataList)
+        //console.log('original', option.chartOptions.series[0].data)
         return highCharts2Image(option)
       })
 
     return Promise.all(promiseList)
       .then(resultList => {
+
+        resultList.forEach(result => {
+          const img = document.createElement('img')
+          img.src = result
+          document.body.appendChild(img)
+        })
+
         const isResultsAreSame = resultList
           .every((v, i, a) => v === a[0])
 
         expect(resultList).to.have.length(5)
         expect(isResultsAreSame).not.to.be.ok()
+
       })
+      .catch(error =>
+        expect().fail(error)
+      )
 
   })
 
@@ -239,6 +307,9 @@ describe('Testing highCharts2Image external features', () => {
     return highCharts2Image(options)
       .then(result =>
         expect(document.querySelectorAll('iframe')).to.have.length(0)
+      )
+      .catch(error =>
+        expect().fail(error)
       )
 
   })
