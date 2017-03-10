@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>highCharts2Image example</title>
+</head>
+<body>
+  <h2>Highcharts complex example</h2>
+  <h3>render Highstock chart to 800x400 image using data from external script</h3>
+
+  <!-- The app -->
+  <script src="../dist/highcharts2image.min.js"></script>
+
+  <!-- Run! -->
+  <script>
+    const stockOptions = {
+      series: []
+    }
+
+    const cb = (chart, win) => {
+      chart.addSeries({
+        name: 'ADBE',
+        data: win.ADBE
+      }, false)
+      
+      chart.addSeries({
+        name: 'MSFT',
+        data: win.MSFT
+      }, false)
+
+      chart.redraw()
+    }
+
+    const options = {
+      chartOptions: stockOptions,
+      chartEngine: 'highstock',
+      chartCallback: cb,
+      distro: {
+        customScript: 'https://www.highcharts.com/samples/data/three-series-1000-points.js'
+      },
+      width: 800,
+      height: 400
+    }
+
+    highCharts2Image(options)
+      .then(result => {
+        const img = document.createElement('img')
+        img.src = result
+        document.body.appendChild(img)
+      })
+      .catch(error => {
+        alert('Error! Open console to see error explanation')
+        console.error(error)
+      })
+  </script>
+
+</body>
+</html>

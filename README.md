@@ -91,10 +91,10 @@ Takes single `options` {object} argument with only one required property 'chartO
 
 - `chartOptions` {object}  - Highcharts/Highstock options
 - [`chartEngine`] {string} - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
-- [`chartEngineVersion`] {string} - Highcharts/Highstock engine version (default is '5.0.7')
+- [`chartEngineVersion`] {string} - Highcharts/Highstock engine version (default is '5.0.9')
 - [`chartCallback`] {function} - options.chartCallback - pass callback function with `chart` and `window` as arguments (default is `chart => chart.redraw()`)
 
-`Please note:` if you are passing custom callback that modifies `chart` object, use 'false' flag for redraw option where it's possible, for example: chart.update({/* some options */}, `false`) 
+`Please note:` if you are passing custom callback that modifies `chart` object, use 'false' flag for redraw option where it's possible, for example: chart.update({/* some options */}, `false`), chart.addSeries({/* some data */}, false), etc...
 and don't forget to call `chart.redraw()` at the end of your callback fn
 - [`distro`] {object} - specify urls for highcharts/highstock libs. Especially useful when creating offline app. Default `{highcharts: 'https://cdnjs.cloudflare.com/.../highcharts.js', exporting: '...url...', etc}`
 - [`width`] {number} - specify width in pixels for output image (default is `600`)
@@ -104,6 +104,7 @@ and don't forget to call `chart.redraw()` at the end of your callback fn
 
 ## Changelog
 
+    1.1.1 - updated default highcharts/highstock lib version to '5.0.9'
     1.1.0 - exposed `distro` option, now it's possible to set custom urls for lib CDNs and even inject custom JS libs; enhanced callback caller; fixed bugs; no more `eval`!
     1.0.4 - fixed compatibility issues with Firefox
     1.0.3 - removed redundant code, disabled `iframeId` option as unneeded

@@ -1,12 +1,12 @@
 /**
- * highCharts2Image v1.1.0 by Nedgeva
+ * highCharts2Image v1.1.1 by Nedgeva
  * 'Render Highcharts/Highstock plots to image on client side without any hassle'
  * https://github.com/Nedgeva/es6-highcharts2image
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @param {object} options - Main highCharts2Image options object
  * @param {object} options.chartOptions - Highcharts/Highstock options
  * @param {string} options.chartEngine - use 'highcharts' or 'highstock' plot engine (default is 'highcharts')
- * @param {string} options.chartEngineVersion - Highcharts/Highstock engine version (default is '5.0.7')
+ * @param {string} options.chartEngineVersion - Highcharts/Highstock engine version (default is '5.0.9')
  * @param {function} options.chartCallback - pass callback function with `chart` and `window` as arguments (default is `chart => chart.redraw()`)
  * @param {object} options.distro - specify urls for highcharts/highstock and even custom libs. Especially useful when creating offline app. Default `{highcharts: 'https://cdnjs.cloudflare.com/.../highcharts.js', exporting: 'https://...', etc}` See spec.js file for more info
  * @param {number} options.width - specify width in pixels for output image (default is `600`)
@@ -40,7 +40,7 @@ const highCharts2Image = options =>
     // setting defaults, if any option is omitted
     const opts = Object.assign({
       chartEngine: 'highcharts',
-      chartEngineVersion: '5.0.7',
+      chartEngineVersion: '5.0.9',
       chartCallback: chart => chart.redraw(),
       width: 600,
       height: 400

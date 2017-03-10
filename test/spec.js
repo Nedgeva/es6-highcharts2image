@@ -210,12 +210,9 @@ describe('Testing highCharts2Image external features', () => {
     }
 
     return highCharts2Image(options)
-      .then(result => {
-        expect(isBase64(result)).to.be(true);
-        /*const img = document.createElement('img')
-        img.src = result
-        document.body.appendChild(img)*/
-      })
+      .then(result =>
+        expect(isBase64(result)).to.be(true)
+      )
       .catch(error =>
         expect().fail(error)
       )
@@ -252,11 +249,11 @@ describe('Testing highCharts2Image external features', () => {
     return Promise.all(promiseList)
       .then(resultList => {
 
-        resultList.forEach(result => {
+        /*resultList.forEach(result => {
           const img = document.createElement('img')
           img.src = result
           document.body.appendChild(img)
-        })
+        })*/
 
         const isResultsAreSame = resultList
           .every((v, i, a) => v === a[0])
